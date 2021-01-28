@@ -4,6 +4,7 @@
 
 # Built-in packages
 import logging
+from os import stat
 import pprint # For printing dicts in a readable format
 import concurrent.futures # For threading each weather station
 
@@ -44,7 +45,7 @@ def findLocation(soup = BeautifulSoup):
 
 def findUptime(soup = BeautifulSoup):
     mData = {}
-    pass
+    return {"updated" : mData}
 
 
 def findWind(soup = BeautifulSoup):
@@ -76,7 +77,8 @@ def findWind(soup = BeautifulSoup):
 
 
 def findTemp(soup = BeautifulSoup):
-    pass
+    mData = {}
+    return {"temperature" : mData}
 
 
 def parsePage(name = "", url = ""):
@@ -85,7 +87,7 @@ def parsePage(name = "", url = ""):
     Underground page. Designed to be used in a multithreaded manner.
     """
     mStationData = {}
-    mStationData[name] = []
+    mStationData[name] = {}
 
     # Make sure we allow the GET call to timeout
     page = requests.get(url = url, timeout = 5)
@@ -94,9 +96,9 @@ def parsePage(name = "", url = ""):
         return mStationData
     data = BeautifulSoup(page.content, features="html.parser")
 
-    mStationData[name].append(findWind(data))
-    mStationData[name].append(findTemp(data))
-    mStationData[name].append(findLocation(data))
+    mStationData[name].update(findWind(data))
+    mStationData[name].update(findTemp(data))
+    mStationData[name].update(findLocation(data))
     return mStationData
 
 
@@ -117,9 +119,7 @@ def parseWeatherUnderground():
         for future in concurrent.futures.as_completed(futures):
             mStationData.update(future.result())
 
-    pprint.pprint(mStationData)
-
-
+    return mStationData
 
 def downloadWeatherUnderground(station = requests.Response):
     # Save the file (so we don't hit the website when debugging)
@@ -130,12 +130,24 @@ def downloadWeatherUnderground(station = requests.Response):
     #     f.write(soup.prettify())
 
 
+def debugWithFile():
+    import inspect, os.path
 
-# station = ""
-# with open('index.html', 'r') as f:
-#     station = f.read()
-# soup = BeautifulSoup(station, features="html.parser")
-# pprint.pprint(findLocation(soup))
+    filename = inspect.getframeinfo(inspect.currentframe()).filename
+    path     = os.path.dirname(os.path.abspath(filename))
+    station = ""
+    with open(path + '\\..\\test_data\\index.html', 'r') as f:
+        station = f.read()
+    soup = BeautifulSoup(station, features="html.parser")
+    pprint.pprint(findLocation(soup))
 
+def printWind(data = dict):
+    for station in data:
+        print(station)
+        pprint.pprint(stationData[station]["wind"])
 
-parseWeatherUnderground()
+#debugWithFile()
+
+stationData = parseWeatherUnderground()
+
+printWind(stationData)
