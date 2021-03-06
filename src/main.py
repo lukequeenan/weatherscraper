@@ -1,10 +1,8 @@
-
 # Make sure you install the following packages
 # pip install requests beautifulsoup4
 
 # Built-in packages
 import logging
-from os import stat
 import pprint # For printing dicts in a readable format
 import concurrent.futures # For threading each weather station
 
@@ -12,7 +10,7 @@ import concurrent.futures # For threading each weather station
 import requests # For downloading the page
 from bs4 import BeautifulSoup # For parsing the page
 
-logging.basicConfig(level = logging.DEBUG)
+#logging.basicConfig(level = logging.DEBUG)
 
 def findLocation(soup = BeautifulSoup):
     """
@@ -150,4 +148,7 @@ def printWind(data = dict):
 
 stationData = parseWeatherUnderground()
 
-printWind(stationData)
+# Sort the data by station name
+sortedData = dict(sorted(stationData.items(), key=lambda item: item[0]))
+
+printWind(sortedData)
