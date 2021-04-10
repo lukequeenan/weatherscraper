@@ -85,7 +85,6 @@ def parsePage(name = "", url = ""):
     Underground page. Designed to be used in a multithreaded manner.
     """
     mStationData = {}
-    mStationData[name] = {}
 
     # Make sure we allow the GET call to timeout
     page = requests.get(url = url, timeout = 5)
@@ -94,9 +93,15 @@ def parsePage(name = "", url = ""):
         return mStationData
     data = BeautifulSoup(page.content, features="html.parser")
 
-    mStationData[name].update(findWind(data))
-    mStationData[name].update(findTemp(data))
-    mStationData[name].update(findLocation(data))
+    mStationData[name] = {}
+    try:
+        mStationData[name].update(findWind(data))
+        mStationData[name].update(findTemp(data))
+        mStationData[name].update(findLocation(data))
+    except:
+        logging.exception("Station '" + name + "' failed to parse!")
+        return {}
+
     return mStationData
 
 
@@ -104,7 +109,8 @@ def parseWeatherUnderground():
     mStations = {"Best Point" : "https://www.wunderground.com/dashboard/pws/INORTH193",
                 "Little Cates Park" : "https://www.wunderground.com/dashboard/pws/INORTH428",
                 "Stone Haven" : "https://www.wunderground.com/dashboard/pws/INORTH269",
-                "Deep Cove" : "https://www.wunderground.com/dashboard/pws/IBRITISH267"
+                "Deep Cove" : "https://www.wunderground.com/dashboard/pws/IBRITISH267",
+                "Bowyer Island" : "https://www.wunderground.com/dashboard/pws/IVANCO1"
                 }
 
     mStationData = {}
